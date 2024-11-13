@@ -2,14 +2,17 @@ from flask import Flask, request, jsonify
 import numpy as np
 import pymysql
 import os
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Load the pretrained model
-model_weights = np.load(os.path.join(os.path.dirname(__file__), 'health_condition_model.npy'))
+model_weights = np.load(os.path.join(os.path.dirname(__file__), '../health_condition_model.npy'))
 
 # Initialize the Flask app
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app)
+
+# Health check route
+@app.route('/')
+def home():
+    return "API is running successfully!"
 
 # Database connection details
 DB_CONFIG = {
@@ -64,9 +67,5 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Explicit handler for Vercel
-from flask import Request as VercelRequest
-from werkzeug.wrappers import Response
-
-def handler(vercel_request: VercelRequest) -> Response:
-    return app(vercel_request.environ, start_response=lambda x, y: None)
+# Explicit WSGI handler for Vercel
+wsgi_app = app.wsgi_app
