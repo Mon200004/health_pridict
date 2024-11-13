@@ -1,7 +1,9 @@
-from flask import Flask, request, jsonify,cors
+from flask import Flask, request, jsonify
 import numpy as np
 import pymysql
 import os
+from flask_cors import CORS
+
 
 # Load the pretrained model
 model_weights = np.load(os.path.join(os.path.dirname(__file__), 'health_condition_model.npy'))
