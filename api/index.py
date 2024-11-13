@@ -5,7 +5,7 @@ import os
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Load the pretrained model
-model_weights = np.load(os.path.join(os.path.dirname(__file__), '../health_condition_model.npy'))
+model_weights = np.load(os.path.join(os.path.dirname(__file__), 'health_condition_model.npy'))
 
 # Initialize the Flask app
 app = Flask(__name__)
