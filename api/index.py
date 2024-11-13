@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,cors
 import numpy as np
 import pymysql
 import os
@@ -69,3 +69,4 @@ def predict():
 
 # Explicit WSGI handler for Vercel
 wsgi_app = app.wsgi_app
+CORS(app)
