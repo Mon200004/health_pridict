@@ -49,46 +49,35 @@ def predict_health(sugar_percentage, avg_temperature, blood_pressure):
 def predict():
     try:
         data = request.json
-        
-        # Validate that all required fields are present
-        required_fields = ['patient_id', 'date', 'sugar_percentage', 'average_temperature', 'blood_pressure']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f"Missing required field: {field}"}), 400
-        
-        # Parse and validate the input data
-        patient_id = data['patient_id']
-        date = data['date']
         sugar_percentage = float(data['sugar_percentage'])
         avg_temperature = float(data['average_temperature'])
-        blood_pressure = data['blood_pressure']
-        
+        blood_pressure = data['blood_pressure']  # Blood pressure as a single string (e.g., "120/80")
+
         # Predict the health state
         health_state = predict_health(sugar_percentage, avg_temperature, blood_pressure)
-        
-        if isinstance(health_state, str):  # Check for prediction error message
+
+        # Check for prediction error
+        if isinstance(health_state, str):  # If it's an error message
             return jsonify({'error': health_state}), 400
-        
+
         # Connect to the database
         connection = pymysql.connect(**DB_CONFIG)
         cursor = connection.cursor()
-        
+
         # Insert data into the database
         insert_query = """
-        INSERT INTO biological_indicators (Patient_ID, Date, Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO biological_indicators (Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition)
+        VALUES (%s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (patient_id, date, sugar_percentage, avg_temperature, blood_pressure, health_state))
+        cursor.execute(insert_query, (sugar_percentage, avg_temperature, blood_pressure, health_state))
         connection.commit()
-        
+
         # Close the database connection
         cursor.close()
         connection.close()
-        
+
         # Return the prediction response
         return jsonify({
-            'patient_id': patient_id,
-            'date': date,
             'sugar_percentage': sugar_percentage,
             'average_temperature': avg_temperature,
             'blood_pressure': blood_pressure,
@@ -100,6 +89,3 @@ def predict():
 
 # Explicit WSGI handler for Vercel
 wsgi_app = app.wsgi_app
-
-if __name__ == '__main__':
-    app.run(debug=True)
