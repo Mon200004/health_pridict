@@ -52,6 +52,8 @@ def predict():
         sugar_percentage = float(data['sugar_percentage'])
         avg_temperature = float(data['average_temperature'])
         blood_pressure = data['blood_pressure']  # Blood pressure as a single string (e.g., "120/80")
+        patient_id = data['patient_id']  # Patient ID from the request
+        date = data['date']  # Date from the request
 
         # Predict the health state
         health_state = predict_health(sugar_percentage, avg_temperature, blood_pressure)
@@ -66,10 +68,10 @@ def predict():
 
         # Insert data into the database
         insert_query = """
-        INSERT INTO biological_indicators (Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO biological_indicators (Patient_ID, Date, Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition)
+        VALUES (%s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (sugar_percentage, avg_temperature, blood_pressure, health_state))
+        cursor.execute(insert_query, (patient_id, date, sugar_percentage, avg_temperature, blood_pressure, health_state))
         connection.commit()
 
         # Close the database connection
@@ -78,6 +80,8 @@ def predict():
 
         # Return the prediction response
         return jsonify({
+            'patient_id': patient_id,
+            'date': date,
             'sugar_percentage': sugar_percentage,
             'average_temperature': avg_temperature,
             'blood_pressure': blood_pressure,
