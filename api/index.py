@@ -1,74 +1,31 @@
 from flask import Flask, request, jsonify
-import numpy as np
-import pymysql
-import os
 from flask_cors import CORS
+import joblib
+import numpy as np
 
+app = Flask(__name__)
+CORS(app)
 
 # Load the pretrained model
-model_weights = np.load(os.path.join(os.path.dirname(__file__), 'health_condition_model.npy'))
+model = joblib.load('health_model.pkl')
 
-# Initialize the Flask app
-app = Flask(__name__)
-
-# Health check route
-@app.route('/')
-def home():
-    return "API is running successfully!"
-
-# Database connection details
-DB_CONFIG = {
-    'host': 'db9801.public.databaseasp.net',
-    'port': 3306,
-    'user': 'db9801',
-    'password': 'E%m7zD5!2s#F',
-    'db': 'db9801'
-}
-
-# Helper function to predict health condition
-def predict_health(sugar_percentage, avg_temperature, systolic, diastolic):
-    features = np.array([sugar_percentage, avg_temperature, systolic, diastolic])
-    features = (features - np.mean(features)) / np.std(features)
-    features = np.insert(features, 0, 1)  # Add the bias term
-    health_prediction = features @ model_weights
-    return float(health_prediction)
-
-# API route for prediction
 @app.route('/api/predict', methods=['POST'])
 def predict():
     try:
         data = request.json
-        sugar_percentage = float(data['sugar_percentage'])
-        avg_temperature = float(data['average_temperature'])
-        systolic = float(data['systolic'])
-        diastolic = float(data['diastolic'])
+        sugar_percentage = data['sugar_percentage']
+        average_temperature = data['average_temperature']
+        systolic = data['systolic']
+        diastolic = data['diastolic']
 
-        health_state = predict_health(sugar_percentage, avg_temperature, systolic, diastolic)
+        # Prepare input data for prediction
+        input_data = np.array([[sugar_percentage, average_temperature, systolic, diastolic]])
+        prediction = model.predict(input_data)[0]
 
-        connection = pymysql.connect(**DB_CONFIG)
-        cursor = connection.cursor()
-
-        insert_query = """
-        INSERT INTO biological_indicators (Sugar_Percentage, Average_Temperature, Systolic, Diastolic, health_condition)
-        VALUES (%s, %s, %s, %s, %s)
-        """
-        cursor.execute(insert_query, (sugar_percentage, avg_temperature, systolic, diastolic, health_state))
-        connection.commit()
-
-        cursor.close()
-        connection.close()
-
-        return jsonify({
-            'sugar_percentage': sugar_percentage,
-            'average_temperature': avg_temperature,
-            'systolic': systolic,
-            'diastolic': diastolic,
-            'predicted_health_state': health_state
-        })
-
+        # Return prediction result
+        return jsonify({'predicted_health_state': int(prediction)})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Explicit WSGI handler for Vercel
-wsgi_app = app.wsgi_app
-CORS(app)
+if __name__ == '__main__':
+    app.run(debug=True)
