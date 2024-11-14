@@ -30,54 +30,49 @@ DB_CONFIG = {
 
 # Helper function to predict health condition
 def predict_health(sugar_percentage, avg_temperature, blood_pressure):
-    # Extract systolic and diastolic from the blood pressure string (e.g., "120/80")
     try:
         systolic, diastolic = map(int, blood_pressure.split('/'))
     except ValueError:
         return "Invalid blood pressure format. Use 'systolic/diastolic' format."
 
-    # Create the feature array and normalize using the stored mean and std from training
     features = np.array([sugar_percentage, avg_temperature, systolic, diastolic])
     normalized_features = (features - mean) / std
-
-    # Calculate the health state as a linear combination of the normalized features, weights, and bias
     health_prediction = np.dot(normalized_features, weights) + bias
     return float(health_prediction)
 
-# API route for prediction
+# API route for prediction and database insertion
 @app.route('/api/predict', methods=['POST'])
 def predict():
     try:
         data = request.json
+        patient_id = int(data['patient_id'])
+        date = data['date']
         sugar_percentage = float(data['sugar_percentage'])
         avg_temperature = float(data['average_temperature'])
-        blood_pressure = data['blood_pressure']  # Blood pressure as a single string (e.g., "120/80")
+        blood_pressure = data['blood_pressure']
 
-        # Predict the health state
         health_state = predict_health(sugar_percentage, avg_temperature, blood_pressure)
 
-        # Check for prediction error
-        if isinstance(health_state, str):  # If it's an error message
+        if isinstance(health_state, str):
             return jsonify({'error': health_state}), 400
 
-        # Connect to the database
+        # Connect to the database and insert all data in one operation
         connection = pymysql.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
-        # Insert data into the database
         insert_query = """
-        INSERT INTO biological_indicators (Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO biological_indicators (Patient_ID, Date, Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition)
+        VALUES (%s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (sugar_percentage, avg_temperature, blood_pressure, health_state))
+        cursor.execute(insert_query, (patient_id, date, sugar_percentage, avg_temperature, blood_pressure, health_state))
         connection.commit()
 
-        # Close the database connection
         cursor.close()
         connection.close()
 
-        # Return the prediction response
         return jsonify({
+            'patient_id': patient_id,
+            'date': date,
             'sugar_percentage': sugar_percentage,
             'average_temperature': avg_temperature,
             'blood_pressure': blood_pressure,
