@@ -3,5 +3,5 @@ numpy
 pymysql
 werkzeug
 flask_cors 
-joblib
+
 
