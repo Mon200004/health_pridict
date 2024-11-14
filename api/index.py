@@ -4,7 +4,7 @@ import pymysql
 import os
 
 # Load the pretrained model
-model_weights = np.load(os.path.join(os.path.dirname(__file__), 'health_model.npy'))
+model_weights = np.load(os.path.join(os.path.dirname(__file__), 'health_pridict_model.npy'))
 
 # Initialize the Flask app
 app = Flask(__name__)
