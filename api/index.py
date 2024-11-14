@@ -3,8 +3,12 @@ import numpy as np
 import pymysql
 import os
 
-# Load the pretrained model
-model_weights = np.load(os.path.join(os.path.dirname(__file__), 'health_model.npy'))
+# Load the pretrained model parameters from .npy file
+model_data = np.load(os.path.join(os.path.dirname(__file__), 'health_model.npy'), allow_pickle=True).item()
+weights = model_data['weights']
+bias = model_data['bias']
+mean = model_data['mean']
+std = model_data['std']
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -20,7 +24,8 @@ DB_CONFIG = {
     'port': 3306,
     'user': 'db9801',
     'password': 'E%m7zD5!2s#F',
-    'db': 'db9801'
+    'db': 'db9801',
+    'cursorclass': pymysql.cursors.DictCursor
 }
 
 # Helper function to predict health condition
@@ -31,10 +36,12 @@ def predict_health(sugar_percentage, avg_temperature, blood_pressure):
     except ValueError:
         return "Invalid blood pressure format. Use 'systolic/diastolic' format."
 
+    # Create the feature array and normalize using the stored mean and std from training
     features = np.array([sugar_percentage, avg_temperature, systolic, diastolic])
-    features = (features - np.mean(features)) / np.std(features)
-    features = np.insert(features, 0, 1)  # Add the bias term
-    health_prediction = features @ model_weights
+    normalized_features = (features - mean) / std
+
+    # Calculate the health state as a linear combination of the normalized features, weights, and bias
+    health_prediction = np.dot(normalized_features, weights) + bias
     return float(health_prediction)
 
 # API route for prediction
@@ -65,6 +72,7 @@ def predict():
         cursor.execute(insert_query, (sugar_percentage, avg_temperature, blood_pressure, health_state))
         connection.commit()
 
+        # Close the database connection
         cursor.close()
         connection.close()
 
