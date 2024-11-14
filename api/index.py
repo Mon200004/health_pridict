@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Load the pretrained model
-model = joblib.load('health_model.pkl')
+model = joblib.load('health_condition_model.npy')
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
