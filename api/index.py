@@ -50,6 +50,7 @@ def predict():
         sugar_percentage = float(data['sugar_percentage'])
         avg_temperature = float(data['average_temperature'])
         blood_pressure = data['blood_pressure']
+        hospital_id = int(data['hospital_id'])
 
         health_state = predict_health(sugar_percentage, avg_temperature, blood_pressure)
 
@@ -61,10 +62,10 @@ def predict():
         cursor = connection.cursor()
 
         insert_query = """
-        INSERT INTO biological_indicators (Patient_ID, Date, Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO biological_indicators (Patient_ID, Date, Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition, Hospital_ID)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (patient_id, date, sugar_percentage, avg_temperature, blood_pressure, health_state))
+        cursor.execute(insert_query, (patient_id, date, sugar_percentage, avg_temperature, blood_pressure, health_state, hospital_id))
         connection.commit()
 
         cursor.close()
@@ -76,7 +77,8 @@ def predict():
             'sugar_percentage': sugar_percentage,
             'average_temperature': avg_temperature,
             'blood_pressure': blood_pressure,
-            'predicted_health_state': health_state
+            'predicted_health_state': health_state,
+            'hospital_id': hospital_id
         })
 
     except Exception as e:
