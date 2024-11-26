@@ -48,7 +48,7 @@ def predict():
         date = data['date']
         sugar_percentage = float(data['sugar_percentage'])
         avg_temperature = float(data['average_temperature'])
-        avg_blood_pressure = float(data['blood_pressure'])
+        avg_blood_pressure = float(data['average_blood_pressure'])
         hospital_id = int(data['hospital_id'])
 
         # Predict health state
@@ -62,7 +62,7 @@ def predict():
         cursor = connection.cursor()
 
         insert_query = """
-        INSERT INTO biological_indicators (Patient_ID, Date, Sugar_Percentage, Average_Temperature, Average_Blood_Pressure, health_condition, Hospital_ID)
+        INSERT INTO biological_indicators (Patient_ID, Date, Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition, Hospital_ID)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(insert_query, (patient_id, date, sugar_percentage, avg_temperature, avg_blood_pressure, health_state, hospital_id))
