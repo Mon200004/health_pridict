@@ -29,54 +29,55 @@ DB_CONFIG = {
 }
 
 # Helper function to predict health condition
-def predict_health(sugar_percentage, avg_temperature, blood_pressure):
+def predict_health(sugar_percentage, avg_temperature, avg_blood_pressure):
     try:
-        systolic, diastolic = map(int, blood_pressure.split('/'))
-    except ValueError:
-        return "Invalid blood pressure format. Use 'systolic/diastolic' format."
-
-    features = np.array([sugar_percentage, avg_temperature, systolic, diastolic])
-    normalized_features = (features - mean) / std
-    health_prediction = np.dot(normalized_features, weights) + bias
-    return float(health_prediction)
+        features = np.array([sugar_percentage, avg_temperature, avg_blood_pressure])
+        normalized_features = (features - mean) / std
+        health_prediction = np.dot(normalized_features, weights) + bias
+        return float(health_prediction)
+    except Exception as e:
+        return f"Error during prediction: {str(e)}"
 
 # API route for prediction and database insertion
 @app.route('/api/predict', methods=['POST'])
 def predict():
     try:
+        # Parse input data
         data = request.json
         patient_id = int(data['patient_id'])
         date = data['date']
         sugar_percentage = float(data['sugar_percentage'])
         avg_temperature = float(data['average_temperature'])
-        blood_pressure = data['blood_pressure']
+        avg_blood_pressure = float(data['average_blood_pressure'])
         hospital_id = int(data['hospital_id'])
 
-        health_state = predict_health(sugar_percentage, avg_temperature, blood_pressure)
+        # Predict health state
+        health_state = predict_health(sugar_percentage, avg_temperature, avg_blood_pressure)
 
-        if isinstance(health_state, str):
+        if isinstance(health_state, str):  # Handle prediction errors
             return jsonify({'error': health_state}), 400
 
-        # Connect to the database and insert all data in one operation
+        # Connect to the database and insert data
         connection = pymysql.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
         insert_query = """
-        INSERT INTO biological_indicators (Patient_ID, Date, Sugar_Percentage, Average_Temperature, Blood_Pressure, health_condition, Hospital_ID)
+        INSERT INTO biological_indicators (Patient_ID, Date, Sugar_Percentage, Average_Temperature, Average_Blood_Pressure, health_condition, Hospital_ID)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_query, (patient_id, date, sugar_percentage, avg_temperature, blood_pressure, health_state, hospital_id))
+        cursor.execute(insert_query, (patient_id, date, sugar_percentage, avg_temperature, avg_blood_pressure, health_state, hospital_id))
         connection.commit()
 
         cursor.close()
         connection.close()
 
+        # Return success response
         return jsonify({
             'patient_id': patient_id,
             'date': date,
             'sugar_percentage': sugar_percentage,
             'average_temperature': avg_temperature,
-            'blood_pressure': blood_pressure,
+            'average_blood_pressure': avg_blood_pressure,
             'predicted_health_state': health_state,
             'hospital_id': hospital_id
         })
