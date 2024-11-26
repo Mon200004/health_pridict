@@ -48,7 +48,7 @@ def predict():
         date = data['date']
         sugar_percentage = float(data['sugar_percentage'])
         avg_temperature = float(data['average_temperature'])
-        avg_blood_pressure = float(data['average_blood_pressure'])
+        avg_blood_pressure = float(data['blood_pressure'])
         hospital_id = int(data['hospital_id'])
 
         # Predict health state
