@@ -3,5 +3,8 @@ numpy
 pymysql
 werkzeug
 flask_cors 
+firebase-admin
+mysql-connector-python
+
 
 
