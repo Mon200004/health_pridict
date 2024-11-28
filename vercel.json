@@ -8,11 +8,15 @@
   ],
   "routes": [
     {
-      "src": "/api/.*",
+      "src": "/api/predict",
       "dest": "api/index.py"
     },
     {
-      "src": "/.*",
+      "src": "/api/notify-critical-patients",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/",
       "dest": "api/index.py"
     }
   ]
