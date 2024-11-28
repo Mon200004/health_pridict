@@ -2,6 +2,7 @@ Flask==3.0.3
 numpy
 mysql-connector-python
 requests
+pymysql
 
 
 
