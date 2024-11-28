@@ -1,14 +1,10 @@
 from flask import Flask, request, jsonify
 import numpy as np
-import pymysql
-from firebase_admin import credentials, messaging, initialize_app
+import mysql.connector
+import requests  # Lightweight library for HTTP requests
 import os
 
 app = Flask(__name__)
-
-# Firebase Initialization
-firebase_cred = credentials.Certificate("api/firebase-key.json")
-initialize_app(firebase_cred)
 
 # Database Configuration
 DB_CONFIG = {
@@ -17,8 +13,11 @@ DB_CONFIG = {
     "user": "db9801",
     "password": "E%m7zD5!2s#F",
     "database": "db9801",
-    "cursorclass": pymysql.cursors.DictCursor,
 }
+
+# Firebase Configuration
+FIREBASE_SERVER_KEY = "YOUR_FIREBASE_SERVER_KEY"
+FIREBASE_TOPIC = "hospital_alerts"
 
 # Load pretrained model parameters
 model_data = np.load(
@@ -39,20 +38,24 @@ def predict_health(sugar_percentage, avg_temperature, avg_blood_pressure):
     except Exception as e:
         raise ValueError(f"Error during prediction: {str(e)}")
 
-# Function to send notifications via Firebase
+# Function to send notifications via Firebase HTTP API
 def send_notification_to_mobile(patient_id, health_condition):
-    title = "Critical Health Alert"
-    body = (
-        f"Patient ID {patient_id} has a critical health condition of {health_condition}. Immediate attention required."
-    )
-    try:
-        message = messaging.Message(
-            notification=messaging.Notification(title=title, body=body),
-            topic="hospital_alerts",
-        )
-        messaging.send(message)
-    except Exception as e:
-        raise RuntimeError(f"Error sending notification: {str(e)}")
+    url = "https://fcm.googleapis.com/fcm/send"
+    headers = {
+        "Authorization": f"key={FIREBASE_SERVER_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "to": f"/topics/{FIREBASE_TOPIC}",
+        "notification": {
+            "title": "Critical Health Alert",
+            "body": f"Patient ID {patient_id} has a critical health condition of {health_condition}. Immediate attention required.",
+        },
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    if response.status_code != 200:
+        raise RuntimeError(f"Failed to send notification: {response.text}")
 
 # API route for health prediction and notification
 @app.route('/api/predict', methods=['POST'])
@@ -71,7 +74,7 @@ def predict_and_notify():
         health_condition = predict_health(sugar_percentage, avg_temperature, avg_blood_pressure)
 
         # Save data to the database
-        connection = pymysql.connect(**DB_CONFIG)
+        connection = mysql.connector.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
         insert_query = """
@@ -115,6 +118,33 @@ def predict_and_notify():
         return jsonify({'status': 'error', 'message': str(re)}), 500
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# Endpoint for checking critical conditions and sending notifications (Cron Job)
+@app.route('/notify-critical-patients', methods=['POST'])
+def notify_critical_patients():
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        cursor = connection.cursor(dictionary=True)
+
+        # Fetch critical health conditions from the database
+        query = """
+            SELECT Patient_ID, health_condition FROM biological_indicators
+            WHERE health_condition >= 60 AND Date = CURDATE()
+        """
+        cursor.execute(query)
+        critical_patients = cursor.fetchall()
+
+        # Send notifications for each critical patient
+        for patient in critical_patients:
+            send_notification_to_mobile(patient['Patient_ID'], patient['health_condition'])
+
+        # Close database connection
+        cursor.close()
+        connection.close()
+
+        return jsonify({"status": "success", "message": "Notifications sent for critical patients."}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # Health check route
 @app.route('/')
