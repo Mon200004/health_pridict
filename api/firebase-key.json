@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "hospitals-app-9eeee",
+  "private_key_id": "0593b4f4556197508f891c851ff2374c32b42773",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDv9yuGdMD+xACH\ndB7Rk6ejr3AcFkGbmYg5Jo59PDhddv1OCTDf138FfA3BY2rv6uy2Lozgh0Gmze2X\n1wlhAr9+GKylxsB3C93Ay0Wt4gUlBI8ymT81dkSIDtTjpOV7h820VGBrWXSoCzZy\nMmcvp6j8OpoB2iEKggR8jDyo5rajdRQbJcqTMI8g4XHKlR9+VwC4JSmP6nzpX/jE\nGaVU75JmxpoCSGkC1uCPRQaL4HbSWSJdsZe7VFPrCm60+sr809kr+AfNzrkqXsk7\n4q4QGyKdsQ7hjWu9Ld+k1umqPPRGzLH02LOcyIqHZuYvRunIwu7JLM3NgKXeSAr8\niKQsBE7FAgMBAAECggEAbwizApV+gcPGrOZ9piLI1HQGj3B67hkmD6+4Cdm2CQVY\nYuXc0A5iD3Md2Eh8wEO3QPscI35iUeECWZpeFB3V5m5bYJ+tCcibVKyZ8sHc+Ip6\nCgMf3Mh7IGugdS8lIjot5A2QyctML790c3XACixthDxHa6j3VengUpL/NHYAt3O9\nNjJPb7Ub9NqG6BmFrPUFbY+XvD0lr6LjZCqrrM95u9OlbiHWTX40Lt4pUwcuqHXv\nbWkHWky5aSfVhstQ6Fm2dDPgOHHhCKEn/UuqZO2vHOuI1UaQ8/gEpsw2vKxYGPAd\n03TcHxzzqWkhVw+QNA8Z1CG45lXudY30vrPmAzOrNwKBgQD6f0G6+Tr1OfU1xCEX\nG3og6ftOU5/L2d7w+HfJkZockmd/yMcOovj1joZmO4P/A4dzBefyDv743oLH9IgY\nVsCoQVXCklAOwihDk6Y9I0MeJdfX7AiPa7Fel1znjnXiyFKRNCyBD8702/qO1vG5\nNW3q/82oa59tFLUnIy/qiw68fwKBgQD1PK+RPbnIq8/Zp0y1H2r3kI/ZsSoAJJvD\nCfjJiW/r4VXRejcfdpnmLpG4tJ1Fhqj+zxc10Eu3ojJFf6Tq7zpvehHF9TOUC0pC\nL0tfmfJebf2+0W0NXKayQRixTFkb13IY7Aq9LWO6YYLIPRHxT1vNmXvfuyFWIt2h\nAPa5X+hiuwKBgQDh73vyz68M1kzERPVvqRnbrA8+E5Dyxb0e7Yzlos007hwqFobs\nPbR9jyLL/OxOS/mUloQhQMNa5x9giL9j7INyfxOCHoPU++xjHz52sGJuQ8XN/Bew\nfHsLjUx/km/jr7lBPKTTd9W75tm0kkyON5G/vx/Yw9GVCnNmLIegbfJJswKBgDZr\nXA5f4y07qykCbgw3R5ZeNv24ybg0Z3g1a0bVv8dZPqD4fOj3eZlRtjaFpey6wB+j\nNuRTL6o1TPCNLbyQj6gTL4R9MA/nHXhoZFJ3qAf6YneIo6l2aOtfdKpLZe6+tWwA\nXTWzr9C5OLtUifnBgX6zU4DHVtN1czb6LsXeGYRnAoGARtOwQjajxUxAV5cocYkE\nxz/vcBgjuEDUbdyrrj1XiDOPWzurExuFa5xC3dLH9tRO5CcTEA8FifO3Eb4mXZ09\nAG1j2EvOjA89wt3UCQ0G8ktkdo+/UPhf+dHoF6Rq9szFJLLoaO0TRbOTJzc/xi0E\nJPdoK+K6ETXkeocOr3w/em8=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-ia92p@hospitals-app-9eeee.iam.gserviceaccount.com",
+  "client_id": "112240531679817585400",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-ia92p%40hospitals-app-9eeee.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
