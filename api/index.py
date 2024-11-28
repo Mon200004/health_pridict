@@ -1,11 +1,24 @@
 from flask import Flask, request, jsonify
 import numpy as np
 import json
+import os
 from datetime import datetime
 import pymysql
 import requests
 
 app = Flask(__name__)
+
+# Load Firebase server key from JSON file
+FIREBASE_KEY_PATH = os.path.join(os.path.dirname(__file__), 'firebase-key.json')
+
+try:
+    with open(FIREBASE_KEY_PATH, 'r') as f:
+        firebase_config = json.load(f)
+    FIREBASE_SERVER_KEY = firebase_config.get('server_key')
+except Exception as e:
+    raise RuntimeError(f"Failed to load Firebase server key: {e}")
+
+FIREBASE_URL = "https://fcm.googleapis.com/fcm/send"
 
 # Pretrained model parameters
 model_data = np.load('api/health_model.npy', allow_pickle=True).item()
@@ -22,10 +35,6 @@ DB_CONFIG = {
     'password': 'E%m7zD5!2s#F',
     'database': 'db9801'
 }
-
-# Firebase notification configuration
-FIREBASE_URL = "https://fcm.googleapis.com/fcm/send"
-FIREBASE_SERVER_KEY = "your-firebase-server-key"  # Replace with your Firebase server key
 
 # Predict health condition
 def predict_health(sugar_percentage, avg_temperature, avg_blood_pressure):
@@ -112,7 +121,7 @@ def predict_and_store():
         return jsonify({'error': str(e)}), 500
 
 # Endpoint to manually trigger notifications
-@app.route('/notify-critical-patients', methods=['POST'])
+@app.route('/api/notify-critical-patients', methods=['POST'])
 def notify_critical_patients():
     try:
         # Connect to the database
