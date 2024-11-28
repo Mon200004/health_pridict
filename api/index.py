@@ -8,7 +8,7 @@ import requests
 app = Flask(__name__)
 
 # Pretrained model parameters
-model_data = np.load('health_model.npy', allow_pickle=True).item()
+model_data = np.load('api/health_model.npy', allow_pickle=True).item()
 weights = model_data['weights']
 bias = model_data['bias']
 mean = model_data['mean']
