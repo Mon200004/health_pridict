@@ -12,7 +12,7 @@
       "dest": "api/index.py"
     },
     {
-      "src": "/api/notify-critical-patients",
+      "src": "/api/update-notified",
       "dest": "api/index.py"
     },
     {
