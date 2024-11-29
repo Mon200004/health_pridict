@@ -74,7 +74,6 @@ def home():
 @app.route('/api/predict', methods=['POST'])
 def predict_and_store():
     try:
-        # Parse request data
         data = request.get_json()
         patient_id = data.get('patient_id')
         date = data.get('date')
@@ -83,10 +82,8 @@ def predict_and_store():
         avg_blood_pressure = float(data.get('average_blood_pressure'))
         hospital_id = data.get('hospital_id')
 
-        # Predict health condition
         health_condition = predict_health(sugar_percentage, avg_temperature, avg_blood_pressure)
 
-        # Insert data into the database
         connection = pymysql.connect(**DB_CONFIG)
         cursor = connection.cursor()
         insert_query = """
@@ -96,7 +93,6 @@ def predict_and_store():
         cursor.execute(insert_query, (patient_id, date, sugar_percentage, avg_temperature, avg_blood_pressure, health_condition, hospital_id))
         connection.commit()
 
-        # Check for critical health condition and send notification
         if health_condition >= 60:
             title = "Critical Health Alert"
             body = f"Patient ID {patient_id} has a critical health condition of {health_condition}."
@@ -105,7 +101,6 @@ def predict_and_store():
         cursor.close()
         connection.close()
 
-        # Return response
         return jsonify({
             'status': 'success',
             'patient_id': patient_id,
@@ -120,35 +115,22 @@ def predict_and_store():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Endpoint to manually trigger notifications
-@app.route('/api/notify-critical-patients', methods=['POST'])
-def notify_critical_patients():
+# Endpoint to update notified column
+@app.route('/api/update-notified', methods=['POST'])
+def update_notified():
     try:
-        # Connect to the database
         connection = pymysql.connect(**DB_CONFIG)
-        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        cursor = connection.cursor()
 
-        # Fetch critical patients
-        query = """
-            SELECT b.Patient_ID, b.health_condition, b.Date, p.Mobile_Number, p.Age
-            FROM biological_indicators b
-            JOIN patients p ON b.Patient_ID = p.ID
-            WHERE b.health_condition >= 60
-            AND b.Date = CURDATE()
-        """
-        cursor.execute(query)
-        critical_patients = cursor.fetchall()
+        update_query = "UPDATE biological_indicators SET notified = 1"
+        cursor.execute(update_query)
 
-        # Send notifications for each critical patient
-        for patient in critical_patients:
-            title = "Critical Patient Alert"
-            body = f"Patient ID {patient['Patient_ID']} (Age: {patient['Age']}) has a critical health condition of {patient['health_condition']}."
-            send_notification_to_topic(title, body)
+        connection.commit()
 
         cursor.close()
         connection.close()
 
-        return jsonify({"status": "success", "message": "Notifications sent"}), 200
+        return jsonify({"status": "success", "message": "All notified values updated to 1"}), 200
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
