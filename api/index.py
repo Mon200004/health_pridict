@@ -8,7 +8,7 @@ import requests
 
 app = Flask(__name__)
 
-# Load Firebase server key from JSON file
+
 FIREBASE_KEY_PATH = os.path.join(os.path.dirname(__file__), 'firebase-key.json')
 
 try:
@@ -20,14 +20,13 @@ except Exception as e:
 
 FIREBASE_URL = "https://fcm.googleapis.com/fcm/send"
 
-# Pretrained model parameters
+
 model_data = np.load('api/health_model.npy', allow_pickle=True).item()
 weights = model_data['weights']
 bias = model_data['bias']
 mean = model_data['mean']
 std = model_data['std']
 
-# Database configuration
 DB_CONFIG = {
     'host': 'db9801.public.databaseasp.net',
     'port': 3306,
@@ -36,7 +35,7 @@ DB_CONFIG = {
     'database': 'db9801'
 }
 
-# Predict health condition
+
 def predict_health(sugar_percentage, avg_temperature, avg_blood_pressure):
     try:
         features = np.array([sugar_percentage, avg_temperature, avg_blood_pressure])
@@ -46,7 +45,7 @@ def predict_health(sugar_percentage, avg_temperature, avg_blood_pressure):
     except Exception as e:
         raise ValueError(f"Prediction error: {e}")
 
-# Send notification to Firebase
+
 def send_notification_to_topic(title, body, topic="hospital_alerts"):
     headers = {
         "Authorization": f"key={FIREBASE_SERVER_KEY}",
@@ -65,12 +64,12 @@ def send_notification_to_topic(title, body, topic="hospital_alerts"):
     except Exception as e:
         return None, {"error": str(e)}
 
-# API health check
+
 @app.route('/')
 def home():
     return "API is running successfully!"
 
-# Endpoint for prediction and data insertion
+
 @app.route('/api/predict', methods=['POST'])
 def predict_and_store():
     try:
@@ -115,7 +114,7 @@ def predict_and_store():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Endpoint to update notified column
+
 @app.route('/api/update-notified', methods=['POST'])
 def update_notified():
     try:
@@ -135,7 +134,7 @@ def update_notified():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# Vercel-specific handler
+
 wsgi_app = app.wsgi_app
 
 if __name__ == "__main__":
